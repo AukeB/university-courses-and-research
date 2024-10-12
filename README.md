@@ -31,6 +31,8 @@ This repository contains all the code I wrote for my University courses and rese
 - **EIA-2020**: Exoplanets: Interiors and Atmosphers, Fall 2020
 - **MAS-2020**: Modern Astrostatistics, 2020.
 - **SSE-2020**: Stellar Structure and Evolution, Spring 2020
+- **ATI-2020**: Astronomical Telescopes & Instruments, 2020
+- **ISM-2020**: Instellar Medium, 2020
 
 ## Research
 
