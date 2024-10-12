@@ -1,0 +1,28 @@
+ # Remote access install MESA instructions
+
+1. ssh [lastname]@[yourpcname].strw.leidenuniv.nl
+2. # go to your directory where you want the files (/data2 or /data1 preferable).
+3. wget --user-agent="Mozilla" http://www.astro.wisc.edu/~townsend/resource/download/mesasdk/old/mesasdk-x86_64-linux-20180822.tar.gz
+4. tar -xzf mesasdk-x86_64-linux-20180822.tar.gz
+5. cd mesasdk
+6. wget https://sourceforge.net/projects/mesa/files/releases/mesa-r10398.zip/download
+7. unzip download
+8. vi ~/.cshrc # (or gedit)
+9. # Add the 2 lines of code, for me it was:
+
+setenv MESASDK_ROOT [your_directory]/mesasdk
+setenv MESA_DIR [your_directory]/mesasdk/mesa-r10398
+
+# google 'difference setenv export' for info on setenv command.
+
+10. source ~/.cshrc # or restart the terminal
+11. source $MESASDK_ROOT/bin/mesasdk_init.csh
+12. cd $MESA_DIR
+13. ./install .
+
+ # Run MESA
+
+1. cd $MESASDK_ROOT
+2. wget https://surfdrive.surf.nl/files/index.php/s/3II2hX0c926AXcE/download
+3. unzip download
+4. cd Lab1

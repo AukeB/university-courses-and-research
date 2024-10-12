@@ -1,0 +1,32 @@
+Logged in to mascara0
+
+ ### Files ###
+
+File 1: /data5/bruinsma/general_documents/lapalma_fits_info.txt
+Contains JDMID, LSTMID, NEXP, BINNED data for each .fits file, for each camera in period of 2017-2018, extracted from the headers of the .fits files located in /data5/mascara/LaPalma
+
+File 2: /data5/bruinsma/stars/559508/559508_lapalma_moredata.txt
+Contains JDMID, LST, LSTSEQ, MAG0, NOBS, X, Y data of star 559508 (just a random star), extracted from the .hdf5 file in /data3/mascara/reduced
+
+File 3: /data5/bruinsma/stars/982823/982823_lapalma_moredata.txt
+Same as file 2, but for a different star.
+
+ ### First example ###
+
+CTRL+F in file 2 for '2017Q1 - Camera: C'. Copy the jdmid and CTRL+F it in file 1.
+1. The JDMID and LST don't exactly match from file 1 and file 2. LST difference is somewhere around 0.03 and JD somewhere around 0.002.
+2. The NOBS in in file 2 isn't the same as NEXP/BINNING in file 1.
+3. If you go to /data5/mascara/LaPalma/20170101LSC/binned, the files have the structure YYYYMMDDT and then the time. This time doesn't match the LST in file 1 or file 2, but seems to be around 5 hours off.
+
+ ### Second example ###
+
+CTRL+F in file 3 for '2017Q2 - Camera: C'. Copy the first jdmid of that period and CTRL+F it in file 1.
+1. In file 3 there are 4 observations of star 982823 that night. As you can see in file 1, these are the 4 last binned images of the first night of April, which makes sense because that is the first night of the second quarter.
+2. The JDMID's and LSTMID's from file 1 and file 3 don't exactly match.
+3. The NOBS from file 3 doesn't match with NEXP/BINNING from file 1.
+4. Here also the LST in the files don't match the one in the filename
+
+
+
+
+

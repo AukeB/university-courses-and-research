@@ -1,0 +1,152 @@
+# Imports
+import numpy
+
+from astropy import units as u
+from astropy.coordinates import SkyCoord
+from astropy.nddata.utils import Cutout2D
+from astropy.io import fits
+from astropy.wcs import WCS
+from astropy.visualization import ZScaleInterval
+from astropy.table import Table
+
+import handy
+
+def cutout_lofar(pointing_dir,pointing,output_dir,ra,dec,cutout_size,make_fits=True):
+	pointing_path = f'{pointing_dir}{pointing}.fits'
+	
+	# Make Astropy sky coordinates.
+	cutout_coords = SkyCoord(ra,dec,frame='icrs',unit=(u.deg,u.deg))
+
+	# Open the fits file, but do not load all the data into RAM but read what is necessary
+	with fits.open(pointing_path,memmap=True) as hdul:
+		data = hdul[0].data
+		header = hdul[0].header
+
+		wcs = WCS(header)
+
+	#the field objects have 2 extra dimensions which we have to collapse!
+	#the mosaics have the proper 2 dimensions already
+	#we also need to make a new WCS
+	if len(data.shape) > 2:
+		data = data[0,0]
+
+		wcs = WCS(naxis = 2)
+		wcs.wcs.ctype = [header['CTYPE1'], header['CTYPE2']]#['RA---TAN', 'DEC--TAN']
+		wcs.wcs.crval = [header['CRVAL1'], header['CRVAL2']]
+		wcs.wcs.crpix = [header['CRPIX1'], header['CRPIX2']]
+		wcs.wcs.cunit = [header['CUNIT1'], header['CUNIT2']]
+		wcs.wcs.cdelt = [header['CDELT1'], header['CDELT2']]
+
+	# Makes a cutout object
+	cutout = Cutout2D(data, cutout_coords, cutout_size, wcs = wcs, mode = 'partial')
+	
+	if make_fits == True:
+		# Save cutout as fits file.
+		fits_output_dir = output_dir+'fits/'
+		handy.folder(fits_output_dir)
+		hdul[0].data = cutout.data
+		hdul[0].header.update(cutout.wcs.to_header())
+		cutout_filename = '{0}{1}_{2:.2f}_{3:.2f}_{4:.0f}.fits'.format(fits_output_dir,pointing,ra,dec,cutout_size)
+		hdul.writeto(cutout_filename,overwrite=True)
+		print(f' Cutout .fits file has been saved as {cutout_filename}.')
+
+	return cutout
+
+def cutout_panstarrs(fig, ra, dec, cutout_size, already_downloaded, rgb_filters = 'irg', subplot_idx = 122, percentile_value = 99.5):
+	"""
+	Make and plot a cutout of a PanSTARRS image on the specified coordinates.
+	Input:
+		fig (matplotlib figure object): the figure in which to add the image subplot.
+		ra, dec (floats): right ascention and declination in degrees, in ICRS
+		cutout_size (astropy units object): size of the cutout image in degrees, arcminutes or arcseconds
+		already_downloaded (list): list of filenames of already downloaded panstarrs images at the file location P_download_loc.
+		rgb_filters (str): filters to use for the image R, G and B channels, respectively
+		subplot_idx (int): integer given to fig.add_subplot indicating the shape of the subplot distribution in the figure and the index of the subplot which is to be created.
+		percentile_value (float): the percentile to scale the image values by.
+	Output:
+		ax (matplotlib axes object): axes of the subplot.
+		wcs (astropy WCS object): the world coordinate system of the downloaded PanSTARRS image.
+		imgshape (tuple): shape of the image.
+		plot_bbox (boolean): whether the downloaded image is smaller than the requested image and if therefore a bounding box in another image needs to be plotted.
+	"""
+	# The maximum image size, otherwise the PanSTARRS image becomes very very large.
+	max_p_size = 3200
+	plot_bbox = False
+
+	tqdm.write(f'Obtaining image at RA = {f_ra} deg, DEC = {f_dec} deg')
+
+	#get download urls for PanSTARRS image
+	#the size for the PanSTARRS query is in pixels (0.25 arcsec/pixel)
+	p_size = int((4 * cutout_size / u.arcsec).to(u.dimensionless_unscaled))
+
+	if max_p_size is not None and p_size > max_p_size:
+		tqdm.write('Using smaller image size for PanSTARRS')
+		p_size = max_p_size
+		plot_bbox = True
+	p_url = Pquery.geturl(ra, dec, size = p_size, format = 'fits', filters = rgb_filters)
+
+
+	#loop over every url in this list
+	for j in tqdm(range(len(p_url)), desc = 'Looping over filters'):
+		url = p_url[j]
+
+		#get the filter of the current download url
+		filter = url[::-1].split('.')[2]
+
+		p_downloadname = getPanSTARRSdownloadname(P_download_loc, f_ra, f_dec, p_size, filter)
+
+		#check if the file is not already downloaded
+		if p_downloadname not in already_downloaded:
+			#download with progress bar
+			with TqdmUpTo(unit = 'B', unit_scale = True, miniters = 1, desc = f'Downloading filter {filter}', disable = False) as t:
+					urllib.request.urlretrieve(url, p_downloadname, reporthook = t.update_to)
+
+	#### now plot as RGB image
+	#load the three filters
+	img_array = []
+	wcs_array = []
+	for f in rgb_filters:
+		p_downloadname = getPanSTARRSdownloadname(P_download_loc, f_ra, f_dec, p_size, f)
+
+		#open the fits file, but do not load all the data into RAM but read what is necessary
+		with fits.open(p_downloadname, memmap = False) as hdul:
+			# print(hdul[0].info())
+			header = hdul[0].header
+			# print(header['NAXIS1'], header['NAXIS2'])
+
+			try:
+				data = hdul[0].data
+			except ValueError: #array has incorrect shape
+				tqdm.write('Warning: data has incorrect shape, replacing with zeroes')
+				data = np.zeros((header['NAXIS1'], header['NAXIS2']))
+
+			wcs = WCS(header)
+
+		#smooth image using a gaussian filter
+		data = gaussian_filter(data, 2)
+
+		img_array.append(data)
+		wcs_array.append(wcs)
+
+	img_array = np.array(img_array)
+	img_array = np.moveaxis(img_array, 0, 2)
+
+	#scale with minmax
+	# img_array = scaleRGBarray(img_array)
+	#apply transformations for visualization
+	transform = AsinhStretch() + PercentileInterval(percentile_value)
+	t_image = transform(img_array)
+
+	#set all pixels with nans to 1
+	t_image[np.isnan(t_image)] = 1
+
+	#### Plot
+	ax = fig.add_subplot(subplot_idx, projection = wcs_array[0])
+
+	ax.imshow(t_image)
+
+	setAxisLabels(ax)
+	setTitle(ax, f'PanSTARRS {rgb_filters[0]}, {rgb_filters[1]} and {rgb_filters[2]}')
+
+	return ax, wcs_array[0], img_array.shape[:2], plot_bbox
+	

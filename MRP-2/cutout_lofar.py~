@@ -1,0 +1,113 @@
+# Imports
+import numpy
+
+from astropy import units as u
+from astropy.coordinates import SkyCoord
+from astropy.nddata.utils import Cutout2D
+from astropy.io import fits
+from astropy.wcs import WCS
+from astropy.visualization import ZScaleInterval
+from astropy.table import Table
+
+import handy
+
+def cutout(pointing_dir,pointing,output_dir,ra,dec,cutout_size,make_fits=True):
+	pointing_path = f'{pointing_dir}{pointing}.fits'
+	
+	# Make Astropy sky coordinates.
+	cutout_coords = SkyCoord(ra,dec,frame='icrs',unit=(u.deg,u.deg))
+
+	# Open the fits file, but do not load all the data into RAM but read what is necessary
+	with fits.open(pointing_path,memmap=True) as hdul:
+		data = hdul[0].data
+		header = hdul[0].header
+
+		wcs = WCS(header)
+
+	#the field objects have 2 extra dimensions which we have to collapse!
+	#the mosaics have the proper 2 dimensions already
+	#we also need to make a new WCS
+	if len(data.shape) > 2:
+		data = data[0,0]
+
+		wcs = WCS(naxis = 2)
+		wcs.wcs.ctype = [header['CTYPE1'], header['CTYPE2']]#['RA---TAN', 'DEC--TAN']
+		wcs.wcs.crval = [header['CRVAL1'], header['CRVAL2']]
+		wcs.wcs.crpix = [header['CRPIX1'], header['CRPIX2']]
+		wcs.wcs.cunit = [header['CUNIT1'], header['CUNIT2']]
+		wcs.wcs.cdelt = [header['CDELT1'], header['CDELT2']]
+
+	# Makes a cutout object
+	cutout = Cutout2D(data, cutout_coords, cutout_size, wcs = wcs, mode = 'partial')
+	
+	if make_fits == True:
+		# Save cutout as fits file.
+		fits_output_dir = output_dir+'fits/'
+		handy.folder(fits_output_dir)
+		hdul[0].data = cutout.data
+		hdul[0].header.update(cutout.wcs.to_header())
+		cutout_filename = '{0}{1}_{2:.2f}_{3:.2f}_{4:.0f}.fits'.format(fits_output_dir,pointing,ra,dec,cutout_size)
+		hdul.writeto(cutout_filename,overwrite=True)
+		print(f' Cutout .fits file has been saved as {cutout_filename}.')
+
+	return cutout
+
+
+	'''
+	#convert from Jy/beam to mJy/beam
+	cutout_data = cutout.data * 1e3
+	tqdm.write('LOFAR image size: {0}'.format(cutout_data.shape))
+
+	#determine vmax
+	vmax = 20
+	data_maxval = np.max(cutout_data[np.isnan(cutout_data) == 0])
+	if data_maxval < vmax:
+		vmax = data_maxval
+
+
+	#### Plot
+	ax = fig.add_subplot(121, projection = cutout.wcs)
+	im = ax.imshow(cutout_data, origin = 'lower', cmap = 'hot',
+				vmin = 0, vmax = vmax)
+
+	setAxisLabels(ax)
+	setTitle(ax, 'LOFAR 150 MHz')
+	#add marker to indicate the given coordinates
+	addCoordMarker(ax, ra, dec)
+
+	#make a colorbar with the same vertical size as the image
+	#this colorbar axis is exactly the correct dimensions
+	cax = plt.axes([0.44, 0.185, 0.02, 0.62])
+	plt.colorbar(im, cax = cax)
+	cax.set_ylabel('Flux [mJy/beam]')
+	#remove the x ticks
+	# cax.set_xticks([])
+
+	return ax, cutout.wcs
+
+
+def setAxisLabels(ax):
+	"""
+	Set axis labels for image with WCS projection
+	"""
+	#set the units of the axes
+	ra = ax.coords[0]
+	ra.set_format_unit(u.deg)
+	dec = ax.coords[1]
+	dec.set_format_unit(u.deg)
+
+	# plt.xlabel(r'$\alpha$')
+	# plt.ylabel(r'$\delta$')
+	ax.set_xlabel('RA')
+	ax.set_ylabel('DEC', labelpad = 0.5)
+
+def setTitle(ax, title):
+	ax.set_title(title, pad = 12)
+
+def addCoordMarker(ax, ra, dec, coordinate_frame = 'icrs'):
+	"""
+	Add a marker to specific coordinates
+	"""
+	ax.scatter(ra, dec, marker = 'x', color = 'white', s = 70,
+				transform = ax.get_transform(coordinate_frame))
+'''

@@ -1,0 +1,133 @@
+'''
+This is the main python file that will run all programms I've written so far w.r.t. handling LOFAR data.
+
+It is possible to:
+ (1) Make cutouts of LoTSS pointings/mosaics and save them as .fits files or plot them as .png files.
+	For the plotting there are different scalings available. Standard are sqrt,linear,quadratic and logarithmic.
+ (2) TODO: Make cutouts with the PanSTARRS images next to it, and on it.
+ (3) Apply PyBDSF to a LoTTS pointing/mosaic.
+ (4) Remove source with gaussian fitting from PyBDSF images.
+'''
+
+ ### Imports ###
+
+import numpy as np
+import sys
+from astropy import units as u
+from spython.main import Client
+import handy
+import download_pointing
+import cutout
+import plot_pointing
+import remove_sources
+
+ ### Directory structure ###
+
+general_dir = '/data2/bruinsma/'
+code_dir = f'{general_dir}code/' # Directory that contains all the .py files.
+pointing_dir = f'{general_dir}dr2fields/' # Download location for LOFAR pointings (mosaics or fields).
+panstarrs_dir = f'{general_dir}panstarrs/' #@ Download location for PanSTARRS data.
+cutout_dir = f'{general_dir}cutouts/' # Cutouts will be stored in this directory.
+catalog_dir = f'{general_dir}pybdsf/' # Catalogues produced as the result of the process_image task, PyBDSF.
+removed_dir = f'{general_dir}removed/' # Removed sources .png files will be stored here.
+simg_path = f'{general_dir}lofar_sksp_ddf.simg' # Path to the singularity image.
+
+ ### Tasks to perform ###
+
+pointing = 'P217+07' # Pointing name.
+make_cutout = True;
+ra = 217.5185 # Center of cutout, right ascension.
+dec = 7.2557 # Center of cutout, declination
+cutout_size = ([10*u.arcmin]) # Size of cutout.
+make_fits = True # Save cutout as .fits file.
+dif_scalings = False # Plot the single LOFAR cutout in different image scalings.
+
+make_pybdsf_catalog = False;
+box_center = [5300,4850] # Center of the region PyBDSF will analyze.
+box_size = [200,200] # Size of the region PyBDSF will analyze.
+show_fit = False; # Optional execution of the show_fit task in PyBDSF.
+print_singularity_output = False; # Optional printing of the blob_detection.py file. Will include PyBDSF output.
+frequency = 140e6 # Frequency of the LoTTS pointing.
+draw_ellipses = True # Draw ellipses around sources.
+
+ ### Pipelines ###
+
+def cutout_pipeline(pointing,ra,dec,cutout_size,make_fits,dif_scalings):
+	# Create pointing and cutout directory if it does not exist yet.
+	handy.folder(pointing_dir)
+	handy.folder(cutout_dir)
+	handy.folder(panstarrs_dir)
+
+	print('Initialising cutout pipeline.\n')
+
+	print(f' RA:          {ra}')
+	print(f' DEC:         {dec}')
+	print(f' Cutout size: {cutout_size}')
+
+	print('\nDownloading LOFAR mosaics/field and PanSTARRS data.\n')
+
+	# Check if poining is already downloaded.
+	if handy.download_file(pointing,pointing_dir) == False:
+		# If not, download the file.
+		download_pointing.set_up_download(pointing_dir,pointing)
+
+	print('\nSaving LOFAR cutout files.\n')
+
+	# For loop for the different cutout sizes.
+	for i in range(len(cutout_size)):
+		# Make cutout, optional to save as .fits file.
+		lofar_cutout = cutout.cutout_lofar(pointing_dir,pointing,cutout_dir,ra,dec,cutout_size[i],make_fits=True)
+
+		# PanSTARRS downloading and plotting.
+		p_size = download_pointing.download_panstarrs(panstarrs_dir,ra,dec,cutout_size[i])
+		#plot_pointing.plot_cutout_panstarrs(panstarrs_dir,ra,dec,p_size,rgb_filter='irg')
+
+		if dif_scalings == True:		
+		# Plot the LOFAR cutout, save as a .png file. Single plot.
+			plot_pointing.plot_cutout_lofar(lofar_cutout,pointing,cutout_dir,cutout_size[i])
+				
+			# 4 plots with different image scalings.	
+			plot_pointing.subplot_cutout_lofar(lofar_cutout,pointing,cutout_dir,cutout_size[i])
+
+		plot_pointing.double_plot(lofar_cutout,pointing,pointing_dir,cutout_dir,panstarrs_dir,
+ra,dec,cutout_size[i],p_size,rgb_filters='irg')
+
+	print('\nCutout pipeline completed.\n')
+
+def run_pybdsf():
+	# Load singularity shell
+	sys.stdout.write(' Loading singularity shell: ')
+	Client.load(simg_path)
+
+	# Execute the script with correct parameter, save the printing output in a variable.
+	output = Client.execute(f'python {code_dir}blob_detection.py -pointing {pointing} -frequency {frequency} -pointing_dir {pointing_dir} -catalog_dir {catalog_dir} --box_center {box_center[0]},{box_center[1]} --box_size {box_size[0]},{box_size[1]} --show_fit {show_fit}'.split())
+
+	# Output some parameters.	
+	catalog_filename = '{0}{1}_catalog_({2},{3})_({4},{5}).fits'.format(catalog_dir,pointing,box_center[0],box_center[1],box_size[0],box_size[1])
+	print(f' Box center: ({box_center[0]},{box_center[1]})')
+	print(f' Box size:   ({box_size[0]},{box_size[1]})')
+	print(' Catalogue saved as {0}.'.format(catalog_filename))
+	
+	# Optional printing of this output.
+	if print_singularity_output == True:
+		handy.singularity(output)
+
+	# Remove point sources.
+	cutout_data,subtracted_data,table_data,pixel_size,is_point_source = remove_sources.remove_sources(pointing,pointing_dir,catalog_filename,box_center,box_size)
+
+	# Plot difference before and after removing sources.
+	plot_pointing.plot_removed_sources(pointing,box_center,box_size,cutout_data,subtracted_data,table_data,
+pixel_size,is_point_source,removed_dir,draw_ellipses)
+
+def main():
+	print(f'\n ### Pointing: {pointing} ###\n')
+	
+	if make_cutout == True:
+		cutout_pipeline(pointing,ra,dec,cutout_size,make_fits,dif_scalings)
+	if make_pybdsf_catalog == True:
+		print('Initiating PyBDSF.')
+		run_pybdsf()
+		print('')
+
+if __name__ == '__main__':
+	main()

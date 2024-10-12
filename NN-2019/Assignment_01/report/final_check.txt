@@ -1,0 +1,17 @@
+Check when uploading
+ - Upload report as pdf (most 10 pages)
+ - Upload code separately in zip file (so no code in the report)
+ - Upload report and code as
+     groupnumber.pdf
+     groupnumber.zip
+ - DO NOT INCLUDE names, studentnumbers or e-mail adresses.
+ 
+ Report guidelines:
+  - Self-contained. Reader should be able to understand whole story without anything else but your report.
+  - Well structured. For each task explain
+     What you were supposed to do
+     What you actually did
+     What the results are
+     MOST IMPORTANT: Draw some conclusions
+  - Detailed. MOST IMPORTANT: In case you see something strange, explain it!
+  - Technically correct. Neatly formatted, spell-checked, table and figures contain informative captions.

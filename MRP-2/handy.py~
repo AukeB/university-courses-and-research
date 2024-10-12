@@ -1,0 +1,64 @@
+import os
+from astropy.wcs import WCS
+import numpy as np
+
+def folder(directory):
+	if not os.path.exists(directory):
+		os.makedirs(directory)
+		print(f' ===> {directory} has been created.')
+		
+def download_file(filename,directory):
+	list_files = os.listdir(directory)
+	filename += '.fits'
+	if filename in list_files:
+		print(f' ===> {filename} already downloaded in current directory.')
+		return True
+	else:
+		return False
+
+def file(directory,filename):
+	file_path = f'{directory}{filename}'
+	if not os.path.exists(file_path):
+		print(f' ===> {file_path} does not exist yet.')
+		return False
+	else:
+		return True
+
+def singularity(output):
+	try:
+		if isinstance(output['message'], list):
+			for o in output['message']:
+				print(o)
+				print('\n')
+		else:
+			print(output['message'])
+	except TypeError:
+		print(output)
+		
+
+def getGaussianParams(table_data, pixel_size, i):
+	amp = table_data['Peak_flux'][i]
+	x0 = table_data['Xposn'][i]
+	y0 = table_data['Yposn'][i]
+
+	#major and minor axis FWHM in pixels
+	MajFWHM = table_data['Maj'][i]/pixel_size
+	MinFWHM = table_data['Min'][i]/pixel_size
+
+	#conversion factor of FWHM to standard deviation
+	FWHMtoSigma = 1/(2*(2*np.log(2))**0.5)
+	Majsigma = MajFWHM * FWHMtoSigma
+	Minsigma = MinFWHM * FWHMtoSigma
+	theta = np.deg2rad(table_data['PA'][i])
+
+	return amp, x0, y0, Majsigma, Minsigma, theta
+
+def wcsTakeFirstTwo(header):
+	wcs = WCS(naxis = 2)
+	wcs.wcs.ctype = [header['CTYPE1'], header['CTYPE2']]
+	wcs.wcs.crval = [header['CRVAL1'], header['CRVAL2']]
+	wcs.wcs.crpix = [header['CRPIX1'], header['CRPIX2']]
+	wcs.wcs.cunit = [header['CUNIT1'], header['CUNIT2']]
+	wcs.wcs.cdelt = [header['CDELT1'], header['CDELT2']]
+
+	return wcs
