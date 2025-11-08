@@ -5,6 +5,7 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict  # type: ignore
 
 
+from src.vacuum_cleaner.map_feature_extractor import MapFeatureExtractor
 from src.vacuum_cleaner.utils import format_for_writing_to_yaml_file
 from src.vacuum_cleaner.constants import CONFIG_PATH
 
@@ -67,14 +68,19 @@ class ConfigManager:
         """
         Update config with map dimensions and max_steps.
         """
-        rows = len(map)
+        map_feature_extractor = MapFeatureExtractor(map=map)
+
+        print(map_feature_extractor.stain_size)
+
+        rows = len(map)  # Replace by map_feature_extractor member variables.
         cols = len(map[0])
+        max_steps = 2 * cols * rows
 
         updated_dimensions = ConfigModel.Map.Dimensions(columns=cols, rows=rows)
 
         # The total energy of the vacuum cleaner is always equal to two times the number of columns
         # times the number of rows.
-        udpated_game = ConfigModel.Game(max_steps=2 * cols * rows)
+        udpated_game = ConfigModel.Game(max_steps=max_steps)
 
         updated_map = config.map.copy(update={"dimensions": updated_dimensions})
         updated_config = config.copy(update={"map": updated_map, "game": udpated_game})
