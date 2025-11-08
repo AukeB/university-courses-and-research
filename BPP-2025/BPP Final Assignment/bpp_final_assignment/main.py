@@ -23,7 +23,7 @@ def main():
         map_loader = MapLoader(path=path)
         map = map_loader.load_map()
 
-        # Extent config settings with properties that can be extracted from the map.
+        # Augment config settings with properties that can be extracted from the map.
         config = config_manager.update_config_with_map_properties(
             config=config,
             map=map
