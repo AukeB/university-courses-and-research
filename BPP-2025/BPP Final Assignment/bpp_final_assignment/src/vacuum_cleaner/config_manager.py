@@ -21,7 +21,7 @@ class ConfigModel(ConfiguredBaseModel):
         fps: int
         background_color: list[int]
 
-    class Grid(ConfiguredBaseModel):
+    class Map(ConfiguredBaseModel):
         class Dimensions(ConfiguredBaseModel):
             columns: int
             rows: int
@@ -41,7 +41,7 @@ class ConfigModel(ConfiguredBaseModel):
         max_steps: int | None = None
 
     window: Window
-    grid: Grid
+    map: Map
     game: Game | None = None
 
 
@@ -64,11 +64,13 @@ class ConfigManager:
         rows = len(map)
         cols = len(map[0])
 
-        new_dimensions = ConfigModel.Grid.Dimensions(columns=cols, rows=rows)
-        new_game = ConfigModel.Game(max_steps=2 * cols * rows)
+        updated_dimensions = ConfigModel.Map.Dimensions(columns=cols, rows=rows)
 
-        new_grid = config.grid.copy(update={"dimensions": new_dimensions})
+        # The total energy of the vacuum cleaner is always equal to two times the number of columns
+        # times the number of rows.
+        udpated_game = ConfigModel.Game(max_steps=2 * cols * rows)
 
-        updated_config = config.copy(update={"grid": new_grid, "game": new_game})
+        updated_map = config.map.copy(update={"dimensions": updated_dimensions})
+        updated_config = config.copy(update={"map": updated_map, "game": udpated_game})
 
         return updated_config

@@ -5,7 +5,7 @@ window:
   fps: 60 # Units: Frame per seconds.
   background_color: [0, 0, 0]
 
-grid:
+map:
   margin: 100 # Units: pixels
   colors:
     wall: [255, 255, 255] # White, 'x'

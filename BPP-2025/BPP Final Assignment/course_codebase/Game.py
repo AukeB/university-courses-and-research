@@ -17,7 +17,10 @@ class Game:
 
 	def play(self):
 		while self.energy>0 and self.map.remainingStains>0:
+			#print('\n', self.player.nrStains, '\n')
 			nextMove = self.player.nextMove(self.map.botPosition, self.energy, self.map.getVision(), self.map.remainingStains)
+			#print('\n', self.map.remainingStains, '\n')
+
 			if nextMove and self.map.isValidMove(nextMove):
 				self.map.moveRobot(nextMove)
 				self.energy-=1

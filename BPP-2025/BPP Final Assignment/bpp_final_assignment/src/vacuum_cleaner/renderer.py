@@ -20,12 +20,12 @@ class Renderer:
         self.background_color = config.window.background_color
 
         # Grid related
-        self.grid_dimensions_columns = config.grid.dimensions.columns
-        self.grid_dimensions_rows = config.grid.dimensions.rows
-        self.grid_lines_color = config.grid.colors.grid_lines
+        self.grid_dimensions_columns = config.map.dimensions.columns
+        self.grid_dimensions_rows = config.map.dimensions.rows
+        self.grid_lines_color = config.map.colors.grid_lines
 
         # Define grid drawing area (smaller than the full window)
-        self.margin = config.grid.margin  # Unit: pixels.
+        self.margin = config.map.margin  # Unit: pixels.
         self.grid_width = self.screen_width - 2 * self.margin
         self.grid_height = self.screen_height - 2 * self.margin
 
@@ -49,10 +49,10 @@ class Renderer:
 
         # Color map for each symbol
         self.color_mapping = {
-            "x": config.grid.colors.wall,
-            ".": config.grid.colors.clean_floor,
-            "@": config.grid.colors.stain,
-            "#": config.grid.colors.vacuum_cleaner,
+            "x": config.map.colors.wall,
+            ".": config.map.colors.clean_floor,
+            "@": config.map.colors.stain,
+            "#": config.map.colors.vacuum_cleaner,
         }
 
     def _readjust_size_parameters(self) -> None:
