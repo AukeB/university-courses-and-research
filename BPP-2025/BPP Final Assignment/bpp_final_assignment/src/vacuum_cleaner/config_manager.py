@@ -1,8 +1,8 @@
 """Module for loading the configuration files."""
 
-import yaml
+import yaml  # type: ignore
 from pathlib import Path
-from pydantic import BaseModel, ConfigDict # type: ignore
+from pydantic import BaseModel, ConfigDict  # type: ignore
 
 from src.vacuum_cleaner.constants import CONFIG_PATH
 
@@ -21,15 +21,12 @@ class ConfigModel(ConfiguredBaseModel):
         fps: int
         background_color: list[int]
 
-
     class Grid(ConfiguredBaseModel):
-        
         class Dimensions(ConfiguredBaseModel):
             columns: int
             rows: int
-        
-        class Colors(ConfiguredBaseModel):
 
+        class Colors(ConfiguredBaseModel):
             wall: list[int]
             clean_floor: list[int]
             stain: list[int]
@@ -39,7 +36,7 @@ class ConfigModel(ConfiguredBaseModel):
         margin: int
         colors: Colors
         dimensions: Dimensions | None = None
-    
+
     class Game(ConfiguredBaseModel):
         max_steps: int | None = None
 
@@ -57,11 +54,9 @@ class ConfigManager:
             config = yaml.safe_load(file)
 
         return ConfigModel(**config)
-    
+
     def update_config_with_map_properties(
-        self,
-        config: ConfigModel,
-        map: list[list[str]]
+        self, config: ConfigModel, map: list[list[str]]
     ) -> ConfigModel:
         """
         Update config with map dimensions and max_steps.
@@ -70,13 +65,10 @@ class ConfigManager:
         cols = len(map[0])
 
         new_dimensions = ConfigModel.Grid.Dimensions(columns=cols, rows=rows)
-        new_game = ConfigModel.Game(max_steps=2*cols*rows)
+        new_game = ConfigModel.Game(max_steps=2 * cols * rows)
 
         new_grid = config.grid.copy(update={"dimensions": new_dimensions})
 
-        updated_config = config.copy(update={
-            "grid": new_grid,
-            "game": new_game
-        })
+        updated_config = config.copy(update={"grid": new_grid, "game": new_game})
 
         return updated_config

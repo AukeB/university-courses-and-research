@@ -1,17 +1,14 @@
 """ """
 
-import pygame as pg # type: ignore
+import pygame as pg  # type: ignore
 
 from src.vacuum_cleaner.config_manager import ConfigModel
+
 
 class Renderer:
     """Handles window setup and visualization for the simulation."""
 
-    def __init__(
-        self,
-        config: ConfigModel, 
-        grid: list[list[str]]
-    ) -> None:
+    def __init__(self, config: ConfigModel, grid: list[list[str]]) -> None:
         """Initialize display and simulation timing."""
         self.grid = grid
 
@@ -26,7 +23,6 @@ class Renderer:
         self.grid_dimensions_columns = config.grid.dimensions.columns
         self.grid_dimensions_rows = config.grid.dimensions.rows
         self.grid_lines_color = config.grid.colors.grid_lines
-
 
         # Define grid drawing area (smaller than the full window)
         self.margin = config.grid.margin  # Unit: pixels.
@@ -46,9 +42,7 @@ class Renderer:
 
         # Initialize Pygame
         self.clock = pg.time.Clock()
-        self.screen = pg.display.set_mode(
-            (self.screen_width, self.screen_height)
-        )
+        self.screen = pg.display.set_mode((self.screen_width, self.screen_height))
         pg.display.set_caption(self.window_title)
 
         self.time_elapsed = 0.0
@@ -58,9 +52,9 @@ class Renderer:
             "x": config.grid.colors.wall,
             ".": config.grid.colors.clean_floor,
             "@": config.grid.colors.stain,
-            "#": config.grid.colors.vacuum_cleaner
+            "#": config.grid.colors.vacuum_cleaner,
         }
-    
+
     def _readjust_size_parameters(self) -> None:
         """ """
         self.cell_width, self.cell_height = int(self.cell_width), int(self.cell_height)
@@ -74,7 +68,7 @@ class Renderer:
     def visualize(self, display_time: float | None = None) -> None:
         """
         Main render loop for the simulation.
-        
+
         Args:
             display_time: If given, automatically stops after this many seconds.
         """
@@ -104,13 +98,13 @@ class Renderer:
         """
         for y, row in enumerate(self.grid):
             for x, cell in enumerate(row):
-                color = self.color_mapping.get(cell, (255, 0, 0)) # Use red if unknown.
-                
+                color = self.color_mapping.get(cell, (255, 0, 0))  # Use red if unknown.
+
                 rect = pg.Rect(
                     self.offset_x + x * self.cell_width,
                     self.offset_y + y * self.cell_height,
                     self.cell_width,
-                    self.cell_height
+                    self.cell_height,
                 )
 
                 pg.draw.rect(self.screen, color, rect)

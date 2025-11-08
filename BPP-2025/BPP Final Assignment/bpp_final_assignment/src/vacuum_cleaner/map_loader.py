@@ -4,6 +4,7 @@ from pathlib import Path
 import csv
 from typing import List
 
+
 class MapLoader:
     """Loads and parses a map from a CSV file."""
 
@@ -16,8 +17,8 @@ class MapLoader:
         if not self.path.exists():
             raise FileNotFoundError(f"File not found: {self.path}")
 
-        with self.path.open(newline='', encoding='utf-8') as csvfile:
-            reader = csv.reader(csvfile, delimiter=',')
+        with self.path.open(newline="", encoding="utf-8") as csvfile:
+            reader = csv.reader(csvfile, delimiter=",")
             data = [row for row in reader]
 
         if not data:
