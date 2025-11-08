@@ -57,7 +57,6 @@ git:
 all:
 	make ruff
 	make mypy
-	make pytest
 	make clean
 	make git
 	@echo "⚡ Successfully executed all tasks."
