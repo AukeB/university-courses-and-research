@@ -1,12 +1,13 @@
 window:
+  title: "Vacuum Cleaner Simulation"
   width: 2400 # Units: pixels
   height: 2400 # Units: pixels
-  title: "Vacuum Cleaner Simulation"
+  margin: 100 # Units: pixels
+
   fps: 60 # Units: Frame per seconds.
   background_color: [0, 0, 0]
 
 map:
-  margin: 100 # Units: pixels
   colors:
     wall: [255, 255, 255] # White, 'x'
     clean_floor: [205, 170, 125] # Light brown, parquet like, '.'.

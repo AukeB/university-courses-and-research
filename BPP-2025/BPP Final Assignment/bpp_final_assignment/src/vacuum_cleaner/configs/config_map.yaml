@@ -1,12 +1,12 @@
 window:
+  title: Vacuum Cleaner Simulation
   width: 2400
   height: 2400
-  title: Vacuum Cleaner Simulation
+  margin: 100
   fps: 60
   background_color: [0, 0, 0]
 
 map:
-  margin: 100
   colors:
     wall: [255, 255, 255]
     clean_floor: [205, 170, 125]
@@ -16,6 +16,9 @@ map:
   dimensions:
     columns: 50
     rows: 50
+  object_properties:
+    stain_size: 1
+    number_of_stains: 259
 
 game:
   max_steps: 5000

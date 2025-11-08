@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict  # type: ignore
 
 from src.vacuum_cleaner.map_feature_extractor import MapFeatureExtractor
 from src.vacuum_cleaner.utils import format_for_writing_to_yaml_file
-from src.vacuum_cleaner.constants import CONFIG_PATH
+from src.vacuum_cleaner.constants import CONFIG_PATH, CONFIG_MAP_OUTPUT_PATH
 
 
 yaml = YAML()
@@ -22,17 +22,14 @@ class ConfigModel(ConfiguredBaseModel):
     """Config that combines all parameters"""
 
     class Window(ConfiguredBaseModel):
+        title: str
         width: int
         height: int
-        title: str
+        margin: int
         fps: int
         background_color: list[int]
 
     class Map(ConfiguredBaseModel):
-        class Dimensions(ConfiguredBaseModel):
-            columns: int
-            rows: int
-
         class Colors(ConfiguredBaseModel):
             wall: list[int]
             clean_floor: list[int]
@@ -40,9 +37,17 @@ class ConfigModel(ConfiguredBaseModel):
             vacuum_cleaner: list[int]
             grid_lines: list[int]
 
-        margin: int
+        class Dimensions(ConfiguredBaseModel):
+            columns: int
+            rows: int
+
+        class ObjectProperties(ConfiguredBaseModel):
+            stain_size: int
+            number_of_stains: int
+
         colors: Colors
         dimensions: Dimensions | None = None
+        object_properties: ObjectProperties | None = None
 
     class Game(ConfiguredBaseModel):
         max_steps: int | None = None
@@ -68,18 +73,30 @@ class ConfigManager:
         """
         Update config with map dimensions and max_steps.
         """
+        # Extract features from map with custom logic.
         map_feature_extractor = MapFeatureExtractor(map=map)
 
+        # Create ConfigModel objects for new/updated parameters.
         updated_dimensions = ConfigModel.Map.Dimensions(
             columns=map_feature_extractor.number_of_columns,
             rows=map_feature_extractor.number_of_rows,
         )
 
-        # The total energy of the vacuum cleaner is always equal to two times the number of columns
-        # times the number of rows.
         updated_game = ConfigModel.Game(max_steps=map_feature_extractor.max_steps)
 
-        updated_map = config.map.copy(update={"dimensions": updated_dimensions})
+        object_properties = ConfigModel.Map.ObjectProperties(
+            stain_size=map_feature_extractor.stain_size,
+            number_of_stains=map_feature_extractor.number_of_stains,
+        )
+
+        # Update configuration variable.
+        updated_map = config.map.copy(
+            update={
+                "dimensions": updated_dimensions,
+                "object_properties": object_properties,
+            }
+        )
+
         updated_config = config.copy(update={"map": updated_map, "game": updated_game})
 
         return updated_config
@@ -87,8 +104,7 @@ class ConfigManager:
     def export_config_to_yaml(self, config: ConfigModel) -> None:
         """ """
         config_dict = config.model_dump()
-
         config_formatted = format_for_writing_to_yaml_file(obj=config_dict)
 
-        with open(Path("src/vacuum_cleaner/configs/config_map.yaml"), "w") as file:
+        with open(CONFIG_MAP_OUTPUT_PATH, "w") as file:
             yaml.dump(config_formatted, file)

@@ -25,7 +25,7 @@ class Renderer:
         self.grid_lines_color = config.map.colors.grid_lines
 
         # Define grid drawing area (smaller than the full window)
-        self.margin = config.map.margin  # Unit: pixels.
+        self.margin = config.window.margin
         self.grid_width = self.screen_width - 2 * self.margin
         self.grid_height = self.screen_height - 2 * self.margin
 

@@ -7,7 +7,7 @@ import traceback
 
 
 settings = {
-	'mapName' : "maps/6_30_7_3_0_0_0_0.csv",
+	'mapName' : "maps/map1.csv",
 	'nrCols' : 30,
 	'nrRows' : 30,
 	'nrStains' : 3,

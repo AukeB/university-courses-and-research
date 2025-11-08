@@ -6,6 +6,7 @@ from pathlib import Path
 
 
 CONFIG_PATH = Path("src/vacuum_cleaner/configs/config.yaml")
+CONFIG_MAP_OUTPUT_PATH = Path("src/vacuum_cleaner/configs/config_map.yaml")
 
 
 # Individual path names.
