@@ -3,10 +3,10 @@
 
  ### Import packages ###
 
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
-import os
+import numpy as np # type: ignore
+import matplotlib.pyplot as plt  # type: ignore
+import pandas as pd  # type: ignore
+import os # type: ignore
 
  ### Global constants ###
 
