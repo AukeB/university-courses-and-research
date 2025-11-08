@@ -74,3 +74,10 @@ class ConfigManager:
         updated_config = config.copy(update={"map": updated_map, "game": udpated_game})
 
         return updated_config
+
+    def export_config_to_yaml(self, config: ConfigModel) -> None:
+        """ """
+        config_dict = config.model_dump()
+
+        with open(Path("src/vacuum_cleaner/configs/config_map.yaml"), "w") as file:
+            yaml.safe_dump(config_dict, file, sort_keys=False)

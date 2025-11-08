@@ -27,6 +27,8 @@ def main():
             map=map
         )
 
+        config_manager.export_config_to_yaml(config=config)
+
         # Visualize the map
         renderer = Renderer(config=config, grid=map)
         renderer.visualize(display_time=3)
