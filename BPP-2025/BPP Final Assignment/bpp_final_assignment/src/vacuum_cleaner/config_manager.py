@@ -1,10 +1,16 @@
 """Module for loading the configuration files."""
 
-import yaml  # type: ignore
+from ruamel.yaml import YAML  # type: ignore
 from pathlib import Path
 from pydantic import BaseModel, ConfigDict  # type: ignore
 
+
+from src.vacuum_cleaner.utils import format_for_writing_to_yaml_file
 from src.vacuum_cleaner.constants import CONFIG_PATH
+
+
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
 
 
 class ConfiguredBaseModel(BaseModel):
@@ -51,7 +57,7 @@ class ConfigManager:
 
     def load_config_file(self) -> ConfigModel:
         with open(self.config_path) as file:
-            config = yaml.safe_load(file)
+            config = yaml.load(file)
 
         return ConfigModel(**config)
 
@@ -79,5 +85,7 @@ class ConfigManager:
         """ """
         config_dict = config.model_dump()
 
+        config_formatted = format_for_writing_to_yaml_file(obj=config_dict)
+
         with open(Path("src/vacuum_cleaner/configs/config_map.yaml"), "w") as file:
-            yaml.safe_dump(config_dict, file, sort_keys=False)
+            yaml.dump(config_formatted, file)
