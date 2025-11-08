@@ -18,7 +18,6 @@ def format_for_writing_to_yaml_file(  # type: ignore[no-untyped-def]
         for k, v in obj.items():
             new_map[k] = format_for_writing_to_yaml_file(v, path + [k])
 
-        # Add spacing between top-level keys for readability
         if not path:
             keys = list(new_map.keys())
             for k in keys[1:]:
@@ -27,16 +26,13 @@ def format_for_writing_to_yaml_file(  # type: ignore[no-untyped-def]
         return new_map
 
     elif isinstance(obj, list):
-        # Force inline for RGB color lists
-        # window.background_color
         if path == ["window", "background_color"]:
             seq = CommentedSeq()
             for item in obj:
                 seq.append(item)
-            seq.fa.set_flow_style()  # Force inline
+            seq.fa.set_flow_style()
             return seq
 
-        # map.colors.<color_name>
         if (
             len(path) >= 3
             and path[0] == "map"
@@ -47,10 +43,9 @@ def format_for_writing_to_yaml_file(  # type: ignore[no-untyped-def]
             seq = CommentedSeq()
             for item in obj:
                 seq.append(item)
-            seq.fa.set_flow_style()  # Force inline
+            seq.fa.set_flow_style()
             return seq
 
-        # Otherwise, default: block style
         seq = CommentedSeq()
         for item in obj:
             seq.append(format_for_writing_to_yaml_file(item, path))
