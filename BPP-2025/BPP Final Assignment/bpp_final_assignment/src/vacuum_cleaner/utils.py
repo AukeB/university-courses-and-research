@@ -3,6 +3,9 @@
 from typing import Any, Union
 from ruamel.yaml.comments import CommentedMap, CommentedSeq  # type: ignore
 
+# TODO: Iteratively detect all instances of lists throughout the nested dictionary,
+# so that all the if statements and hardcoding can be deleted.
+
 
 def format_for_writing_to_yaml_file(  # type: ignore[no-untyped-def]
     obj: Union[dict, list, Any], path=None

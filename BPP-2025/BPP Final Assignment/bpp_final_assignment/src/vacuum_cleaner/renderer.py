@@ -49,7 +49,7 @@ class Renderer:
 
         # Color map for each symbol
         self.color_mapping = {
-            "x": config.map.colors.wall,
+            "x": config.map.colors.wall,  # TODO: Move characters to config file.
             ".": config.map.colors.clean_floor,
             "@": config.map.colors.stain,
             "#": config.map.colors.vacuum_cleaner,
