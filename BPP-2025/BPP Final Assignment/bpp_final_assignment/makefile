@@ -1,5 +1,5 @@
 # Default project folder
-PROJECT_NAME = src/my_project
+PROJECT_NAME = src/vacuum_cleaner
 
 # Format and lint code with Ruff
 ruff:
@@ -26,12 +26,12 @@ mypy:
 # --cov=$(PROJECT_NAME): Measure test coverage for the project
 # --cov-report=term-missing: Show which lines are missing coverage
 # --cov-branch: Track branch coverage, not just line coverage
-pytest:
-	uv run pytest tests -vvvs \
-		--cov=$(PROJECT_NAME) \
-		--cov-report=term-missing \
-		--cov-branch
-	@echo "🧪 Successfully executed pytest."
+# pytest:
+# 	uv run pytest tests -vvvs \
+# 		--cov=$(PROJECT_NAME) \
+# 		--cov-report=term-missing \
+# 		--cov-branch
+# 	@echo "🧪 Successfully executed pytest."
 
 # Remove caches and temporary files
 clean:

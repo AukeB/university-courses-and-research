@@ -1,0 +1,15 @@
+window:
+  width: 2400 # Units: pixels
+  height: 2400 # Units: pixels
+  title: "Vacuum Cleaner Simulation"
+  fps: 60 # Units: Frame per seconds.
+  background_color: [0, 0, 0]
+
+grid:
+  margin: 100 # Units: pixels
+  colors:
+    wall: [255, 255, 255] # White, 'x'
+    clean_floor: [205, 170, 125] # Light brown, parquet like, '.'.
+    stain: [139, 69, 19] # Dark brown, '@'.
+    vacuum_cleaner: [0, 0, 0] # Black, '#'.
+    grid_lines: [0, 0, 0] # Black gridlines.

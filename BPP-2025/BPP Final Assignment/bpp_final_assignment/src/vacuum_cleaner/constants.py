@@ -2,7 +2,14 @@
 
 from pathlib import Path
 
+# Configuration path.
+
+
+CONFIG_PATH = Path("src/vacuum_cleaner/configs/config.yaml")
+
+
 # Individual path names.
+
 
 PATH_MAP_1 = Path("src/vacuum_cleaner/maps/map1.csv")
 PATH_MAP_2 = Path("src/vacuum_cleaner/maps/map2.csv")
@@ -29,6 +36,7 @@ PATH_MAP_LVL_10_3 = Path("src/vacuum_cleaner/maps/map_lvl_10_3.csv")
 
 
 # All paths
+
 
 ALL_PATHS = [
     PATH_MAP_1,
