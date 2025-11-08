@@ -14,8 +14,8 @@ map:
     vacuum_cleaner: [0, 0, 0]
     grid_lines: [0, 0, 0]
   dimensions:
-    columns: 10
-    rows: 10
+    columns: 50
+    rows: 50
 
 game:
-  max_steps: 200
+  max_steps: 5000

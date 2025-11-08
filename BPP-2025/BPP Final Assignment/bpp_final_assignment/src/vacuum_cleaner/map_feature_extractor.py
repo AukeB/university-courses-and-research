@@ -11,22 +11,19 @@ class MapFeatureExtractor:
         self.number_of_rows = len(self.map)
         self.number_of_columns = len(self.map[0])
         self.max_steps = 2 * self.number_of_rows * self.number_of_columns
-        self.stain_size: int = self._determine_stain_size()
 
-    def _determine_stain_size(self) -> int:
-        """
-        Determine the size of a square stain (@) in a map.
-        Assumes all stains are square and contiguous, but can handle
-        multiple stains or adjacent stains by taking the most common
-        width and height found among all '@' cells.
+        self.stain_size: int = self._determine_object_size(cell_value="@")
+        self.number_of_stains: int = self._determine_number_of_objects(
+            object_size=self.stain_size, cell_value="@"
+        )
 
-        Returns:
-            size of the square (number of cells along one side)
-        """
+    def _determine_object_size(self, cell_value: str) -> int:
+        """ """
 
         def find_distance_to_different_neighbor(
             y: int, x: int, dy: int, dx: int, cell_value: str
         ) -> int:
+            """ """
             distance = 0
 
             while (
@@ -44,31 +41,51 @@ class MapFeatureExtractor:
 
         for y, row in enumerate(self.map):
             for x, cell in enumerate(row):
-                if cell == "@":
+                if cell == cell_value:
                     width = (
                         1
-                        + find_distance_to_different_neighbor(y, x, 0, -1, "@")
-                        + find_distance_to_different_neighbor(y, x, 0, 1, "@")
+                        + find_distance_to_different_neighbor(y, x, 0, -1, cell_value)
+                        + find_distance_to_different_neighbor(y, x, 0, 1, cell_value)
                     )
                     height = (
                         1
-                        + find_distance_to_different_neighbor(y, x, -1, 0, "@")
-                        + find_distance_to_different_neighbor(y, x, 1, 0, "@")
+                        + find_distance_to_different_neighbor(y, x, -1, 0, cell_value)
+                        + find_distance_to_different_neighbor(y, x, 1, 0, cell_value)
                     )
 
                     widths.append(width)
                     heights.append(height)
 
         if not widths or not heights:
-            raise ValueError("No stain found in the map")
+            raise ValueError("No objects found in the map")
 
         width_value = min(widths)
         height_value = min(heights)
 
         if width_value != height_value:
             raise ValueError(
-                f"Inconsistent stain shape: most common width={width_value}, "
-                f"height={height_value}"
+                f"Inconsistent object shape: width={width_value}, height={height_value}"
             )
 
         return width_value
+
+    def _determine_number_of_objects(self, object_size: int, cell_value: str) -> int:
+        """ """
+        count = 0
+
+        for y in range(self.number_of_rows - object_size + 1):
+            for x in range(self.number_of_columns - object_size + 1):
+                full_object = True
+
+                for dy in range(object_size):
+                    for dx in range(object_size):
+                        if self.map[y + dy][x + dx] != cell_value:
+                            full_object = False
+                            break
+                    if not full_object:
+                        break
+
+                if full_object:
+                    count += 1
+
+        return count

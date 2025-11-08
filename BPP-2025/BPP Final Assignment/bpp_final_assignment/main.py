@@ -34,7 +34,7 @@ def main():
 
         # Visualize the map
         renderer = Renderer(config=config, grid=map)
-        renderer.visualize(display_time=0.5)
+        renderer.visualize(display_time=3)
 
     pg.quit()
 
