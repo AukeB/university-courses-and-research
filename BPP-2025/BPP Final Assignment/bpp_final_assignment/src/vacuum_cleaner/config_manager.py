@@ -70,20 +70,17 @@ class ConfigManager:
         """
         map_feature_extractor = MapFeatureExtractor(map=map)
 
-        print(map_feature_extractor.stain_size)
-
-        rows = len(map)  # Replace by map_feature_extractor member variables.
-        cols = len(map[0])
-        max_steps = 2 * cols * rows
-
-        updated_dimensions = ConfigModel.Map.Dimensions(columns=cols, rows=rows)
+        updated_dimensions = ConfigModel.Map.Dimensions(
+            columns=map_feature_extractor.number_of_columns,
+            rows=map_feature_extractor.number_of_rows,
+        )
 
         # The total energy of the vacuum cleaner is always equal to two times the number of columns
         # times the number of rows.
-        udpated_game = ConfigModel.Game(max_steps=max_steps)
+        updated_game = ConfigModel.Game(max_steps=map_feature_extractor.max_steps)
 
         updated_map = config.map.copy(update={"dimensions": updated_dimensions})
-        updated_config = config.copy(update={"map": updated_map, "game": udpated_game})
+        updated_config = config.copy(update={"map": updated_map, "game": updated_game})
 
         return updated_config
 

@@ -7,12 +7,14 @@ from src.vacuum_cleaner.config_manager import ConfigManager
 from src.vacuum_cleaner.renderer import Renderer
 from src.vacuum_cleaner.constants import ALL_PATHS
 
+from pathlib import Path
 
 def main():
     """ """
     pg.init()
 
     for path in ALL_PATHS:
+        # if path == Path("src/vacuum_cleaner/maps/map_lvl_10_3.csv"):
         # Load configuration file.
         config_manager = ConfigManager()
         config = config_manager.load_config_file()
@@ -32,7 +34,7 @@ def main():
 
         # Visualize the map
         renderer = Renderer(config=config, grid=map)
-        renderer.visualize(display_time=3)
+        renderer.visualize(display_time=0.5)
 
     pg.quit()
 
