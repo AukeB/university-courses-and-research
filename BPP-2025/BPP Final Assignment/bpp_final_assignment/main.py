@@ -27,6 +27,7 @@ def main():
             map=map
         )
 
+        # Export config after it was updated for clarity.
         config_manager.export_config_to_yaml(config=config)
 
         # Visualize the map
