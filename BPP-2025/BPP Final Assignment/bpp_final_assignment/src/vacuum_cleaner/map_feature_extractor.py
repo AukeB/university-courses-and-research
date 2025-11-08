@@ -17,6 +17,14 @@ class MapFeatureExtractor:
             object_size=self.stain_size, cell_value="@"
         )
 
+        # TODO: Make this work for pillars (ignore walls at edges of grid).
+        # TODO: Create overview of stains, pillars etc. definitions and level 6
+        # to 10 definitions (what can occur and what can not occur for each level).
+        self.pillar_size: int = self._determine_object_size(cell_value="x")
+        self.number_of_pillars: int = self._determine_number_of_objects(
+            object_size=self.pillar_size, cell_value="x"
+        )
+
     def _determine_object_size(self, cell_value: str) -> int:
         """ """
 
